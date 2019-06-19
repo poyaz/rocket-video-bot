@@ -1,0 +1,27 @@
+version: '2.2'
+services:
+  api:
+    build:
+      context: docker/dockerfile/api
+    working_dir: /app
+    expose:
+      - 3000
+    volumes:
+      - $PWD:/app
+    networks:
+      - main
+    environment:
+      - "NPM_REGISTRY=https://registry.npmjs.org"
+    command:  sh -c "npm install; npm start"
+    restart: "always"
+
+  tor:
+    image: docker.loc:5000/dperson/torproxy
+    environment:
+      - "EXITNODE={us} StrictNodes 1"
+    networks:
+      - main
+    restart: "always"
+
+networks:
+  main:

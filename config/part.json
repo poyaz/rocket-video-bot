@@ -1,0 +1,13 @@
+{
+  "custom": {
+    "rocket": {
+      "url": "",
+      "bot": {
+        "username": "videoBot"
+      },
+      "sendTo": [
+        "#translate"
+      ]
+    }
+  }
+}

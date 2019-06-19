@@ -1,0 +1,31 @@
+{
+  "server": {
+    "http": {
+      "port": 80,
+      "https": {
+        "port": 443
+      },
+      "public": {
+        "host": "",
+        "http": {
+          "port": 80
+        },
+        "https": {
+          "port": 443
+        }
+      }
+    }
+  },
+  "database": {},
+  "custom": {
+    "rocket": {
+      "url": "",
+      "api": "/api/v1",
+      "bot": {
+        "username": "",
+        "password": ""
+      },
+      "sendTo": []
+    }
+  }
+}

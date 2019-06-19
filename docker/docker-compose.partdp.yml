@@ -1,0 +1,9 @@
+version: '2.2'
+services:
+  api:
+    environment:
+      - "NPM_REGISTRY=https://npm.partdp.ir"
+      - "NODE_ENV=partdp"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    command:  sh -c "npm install --only=prod; npm start"
