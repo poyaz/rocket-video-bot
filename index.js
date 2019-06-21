@@ -6,16 +6,14 @@ const config = require('config');
 const express = require('express');
 const Promise = require('bluebird');
 const bodyParser = require('body-parser');
-/**
- * @property accessAsync
- * @property mkdirAsync
- */
-const fs = Promise.promisifyAll(require('fs'));
+const crypto = require('crypto');
 
 const PORT = config.get('server.http.port');
 
 const logger = require('./lib/log/winston');
 const helper = require('./lib/helper');
+const db = require('./lib/db');
+const Output = require('./lib/output');
 
 /**
  * @property use
@@ -57,55 +55,100 @@ app.post('/hook/rocket', async (req, res) => {
   }
 
   const sendTo = await helper.getRoomId(sendList[0].name);
+  let download = null;
 
   const youtubeMatch = /youtube\.com\/watch\?v=(.+)/.exec(message);
   if (youtubeMatch) {
-    const video = {
-      id: youtubeMatch[1],
-      str: null,
+    db[youtubeMatch[1]] = {
+      type: 'youtube',
+      subtitle: {
+        exist: false,
+      },
+      message: {
+        rid: null,
+        'fetch-video-info': null,
+        'downloading-subtitle': null,
+        'downloading-video': null,
+      },
     };
 
-    try {
-      await fs.accessAsync(`./storage/temp/${video.id}`, fs.constants.F_OK);
-    } catch (error) {
-      await fs.mkdirAsync(`./storage/temp/${video.id}`);
-    }
+    await helper.createFolder(youtubeMatch[1]);
+    download = helper.startDownloadSubtitleFromYoutube(youtubeMatch[1], message);
+  }
 
-    try {
-      const subtitle = helper.startDownloadSubtitleFromYoutube(
-        video.id,
-        message,
-        sendTo._id,
-      );
-      subtitle.on('data', async (data) => {
-        if (data.type === 'downloading-subtitle') {
-          await helper.sendRocketSuccess(data.type, sendTo._id, [data.file.id]);
-        }
-      });
-      subtitle.on('error', async (error) => {
-        await helper.sendRocketFail('error', sendTo._id, [
-          {
-            key: 'message',
-            value: error.toString(),
-          },
-        ]);
-      });
-    } catch (error) {
-      await helper.sendRocketFail('error', sendTo._id, [
-        {
-          key: 'message',
-          value: error.message.toString(),
-        },
-      ]);
-    }
+  const wsjMatch = /wsj\.com\/video.+\/(.+).html$/.exec(message);
+  if (wsjMatch) {
+    db[wsjMatch[1]] = {
+      type: 'wsj',
+      subtitle: {
+        exist: false,
+      },
+      message: {
+        rid: null,
+        'fetch-video-info': null,
+        'downloading-subtitle': null,
+        'downloading-video': null,
+      },
+    };
+
+    await helper.createFolder(wsjMatch[1]);
+    download = helper.startDownloadSubtitleFromWsj(wsjMatch[1], message);
+  }
+
+  const cnnMatch = /cnn\.com\/videos\/(.+)/.exec(message);
+  if (cnnMatch) {
+    const md5sum = crypto
+      .createHash('md5')
+      .update(cnnMatch[1])
+      .digest('hex');
+
+    db[cnnMatch[1]] = {
+      type: 'cnn',
+      subtitle: {
+        exist: false,
+      },
+      message: {
+        rid: null,
+        'fetch-video-info': null,
+        'downloading-subtitle': null,
+        'downloading-video': null,
+      },
+    };
+
+    await helper.createFolder(md5sum);
+    download = helper.startDownloadSubtitleFromCnn(cnnMatch[1], message);
+  }
+
+  if (download) {
+    await downloadEvent(download, sendTo);
   }
 
   res.setHeader('Content-Type', 'application/json');
   res.send('{"status": "success"}');
 });
 
+async function downloadEvent(download, sendTo) {
+  try {
+    download.on('data', (data) => new Output(sendTo._id, data));
+    download.on('error', async (error) => {
+      await helper.sendRocketFail('error', sendTo._id, [
+        {
+          key: 'message',
+          value: error.toString(),
+        },
+      ]);
+    });
+  } catch (error) {
+    await helper.sendRocketFail('error', sendTo._id, [
+      {
+        key: 'message',
+        value: error.message.toString(),
+      },
+    ]);
+  }
+}
+
 Promise.resolve()
-  // Launch the Node.js app
   .then(() =>
     app.listen(PORT, () => {
       logger.info(`Example app listening on port ${PORT}!`);
