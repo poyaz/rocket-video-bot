@@ -1,4 +1,4 @@
-FROM node:10.16.0-alpine
+FROM docker.loc:5000/node:10.16.0-alpine
 
 ENV EDGE_REPOSITORY=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
