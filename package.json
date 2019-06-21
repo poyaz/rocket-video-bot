@@ -18,8 +18,8 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "uuid": "^3.3.2",
-    "vtt-to-srt": "^0.1.0",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "node-captions": "^0.4.6"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0",
