@@ -55,72 +55,105 @@ app.post('/hook/rocket', async (req, res) => {
   }
 
   const sendTo = await helper.getRoomId(sendList[0].name);
-  let download = null;
+  const videoObj = {
+    id: null,
+    download: null,
+  };
 
   const youtubeMatch = /youtube\.com\/watch\?v=(.+)/.exec(message);
   if (youtubeMatch) {
-    db[youtubeMatch[1]] = {
+    videoObj.id = youtubeMatch[1];
+    db[videoObj.id] = {
       type: 'youtube',
       subtitle: {
         exist: false,
       },
       message: {
         rid: null,
-        'fetch-video-info': null,
+        'fetch-subtitle-info': null,
         'downloading-subtitle': null,
+        'fetch-video-info': null,
+        'downloading-video': null,
+      },
+      lock: {
+        'downloading-video': false,
+      },
+      part: {
         'downloading-video': null,
       },
     };
 
-    await helper.createFolder(youtubeMatch[1]);
-    download = helper.startDownloadSubtitleFromYoutube(youtubeMatch[1], message);
+    await helper.createFolder(videoObj.id);
+    videoObj.download = helper.startDownloadSubtitleFromYoutube(youtubeMatch[1], message);
   }
 
   const wsjMatch = /wsj\.com\/video.+\/(.+).html$/.exec(message);
   if (wsjMatch) {
-    db[wsjMatch[1]] = {
+    videoObj.id = wsjMatch[1];
+    db[videoObj.id] = {
       type: 'wsj',
       subtitle: {
         exist: false,
       },
       message: {
         rid: null,
-        'fetch-video-info': null,
+        'fetch-subtitle-info': null,
         'downloading-subtitle': null,
+        'fetch-video-info': null,
+        'downloading-video': null,
+      },
+      lock: {
+        'downloading-video': false,
+      },
+      part: {
         'downloading-video': null,
       },
     };
 
-    await helper.createFolder(wsjMatch[1]);
-    download = helper.startDownloadSubtitleFromWsj(wsjMatch[1], message);
+    await helper.createFolder(videoObj.id);
+    videoObj.download = helper.startDownloadSubtitleFromWsj(wsjMatch[1], message);
   }
 
   const cnnMatch = /cnn\.com\/videos\/(.+)/.exec(message);
   if (cnnMatch) {
+    videoObj.id = cnnMatch[1];
     const md5sum = crypto
       .createHash('md5')
-      .update(cnnMatch[1])
+      .update(videoObj.id)
       .digest('hex');
 
-    db[cnnMatch[1]] = {
+    db[videoObj.id] = {
       type: 'cnn',
       subtitle: {
         exist: false,
       },
       message: {
         rid: null,
-        'fetch-video-info': null,
+        'fetch-subtitle-info': null,
         'downloading-subtitle': null,
+        'fetch-video-info': null,
+        'downloading-video': null,
+      },
+      lock: {
+        'downloading-video': false,
+      },
+      part: {
         'downloading-video': null,
       },
     };
 
     await helper.createFolder(md5sum);
-    download = helper.startDownloadSubtitleFromCnn(cnnMatch[1], message);
+    videoObj.download = helper.startDownloadSubtitleFromCnn(videoObj.id, message);
   }
 
-  if (download) {
-    await downloadEvent(download, sendTo);
+  if (videoObj.id && videoObj.download) {
+    /**
+     * Event for download subtitle
+     */
+    await downloadEvent(videoObj.download, sendTo);
+
+    const downloadVideo = helper.startDownloadVideo(videoObj.id, message);
+    await downloadEvent(downloadVideo, sendTo);
   }
 
   res.setHeader('Content-Type', 'application/json');
