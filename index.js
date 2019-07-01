@@ -76,8 +76,8 @@ app.post('/hook/rocket', async (req, res) => {
         'fetch-video-info': null,
         'downloading-video': null,
       },
-      lock: {
-        'downloading-video': false,
+      last: {
+        'downloading-video': null,
       },
       part: {
         'downloading-video': null,
@@ -104,8 +104,8 @@ app.post('/hook/rocket', async (req, res) => {
         'fetch-video-info': null,
         'downloading-video': null,
       },
-      lock: {
-        'downloading-video': false,
+      last: {
+        'downloading-video': null,
       },
       part: {
         'downloading-video': null,
@@ -137,8 +137,8 @@ app.post('/hook/rocket', async (req, res) => {
         'fetch-video-info': null,
         'downloading-video': null,
       },
-      lock: {
-        'downloading-video': false,
+      last: {
+        'downloading-video': null,
       },
       part: {
         'downloading-video': null,
@@ -166,7 +166,15 @@ app.post('/hook/rocket', async (req, res) => {
 async function downloadEvent(download, sendTo) {
   try {
     download.on('data', (data) => new Output(sendTo._id, data));
-    download.on('error', async (error) => {
+    download.on('error', async (error, id) => {
+      if (Object.hasOwnProperty.call(db, id)) {
+        db[id].message = {
+          'fetch-subtitle-info': null,
+          'downloading-subtitle': null,
+          'fetch-video-info': null,
+          'downloading-video': null,
+        };
+      }
       await helper.sendRocketFail('error', sendTo._id, [
         {
           key: 'message',
