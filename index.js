@@ -65,6 +65,7 @@ app.post('/hook/rocket', async (req, res) => {
     videoObj.id = youtubeMatch[1];
     db[videoObj.id] = {
       type: 'youtube',
+      hash: videoObj.id,
       subtitle: {
         exist: false,
       },
@@ -92,6 +93,7 @@ app.post('/hook/rocket', async (req, res) => {
     videoObj.id = wsjMatch[1];
     db[videoObj.id] = {
       type: 'wsj',
+      hash: videoObj.id,
       subtitle: {
         exist: false,
       },
@@ -124,6 +126,7 @@ app.post('/hook/rocket', async (req, res) => {
 
     db[videoObj.id] = {
       type: 'cnn',
+      hash: md5sum,
       subtitle: {
         exist: false,
       },
