@@ -23,5 +23,25 @@ services:
       - main
     restart: "always"
 
+  ssh-proxy:
+    image: docker.loc:5000/ssh-proxy/client:1.0.0
+#    environment:
+#      - "REMOTE_PORT=$REMOTE_PORT"
+#      - "REMOTE_HOST=$REMOTE_HOST"
+#      - "REMOTE_USERNAME=$REMOTE_USERNAME"
+#      - "SSH_TUNNEL_PORT=$SSH_TUNNEL_PORT"
+#      - "USER_SSH_PRIVATE_KEY=$USER_SSH_PRIVATE_KEY"
+    networks:
+      - main
+    restart: "always"
+
+  download:
+    image: docker.loc:5000/httpd:2.4-alpine
+    volumes:
+      - $PWD/storage/download:/usr/local/apache2/htdocs/download
+    networks:
+      - main
+    restart: "always"
+
 networks:
   main:
