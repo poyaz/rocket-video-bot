@@ -7,6 +7,9 @@ package-lock.json
 storage/temp/*
 !storage/temp/.gitkeep
 
+storage/download/*
+!storage/download/.gitkeep
+
 build/*
 !build/.gitkeep
 
