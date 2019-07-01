@@ -18,6 +18,16 @@
   },
   "database": {},
   "custom": {
+    "proxy": "",
+    "download": {
+      "protocol": "http",
+      "host": "",
+      "port": "",
+      "replace": {
+        "from": "./storage",
+        "to": ""
+      }
+    },
     "rocket": {
       "url": "",
       "api": "/api/v1",

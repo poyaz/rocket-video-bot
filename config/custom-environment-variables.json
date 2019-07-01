@@ -18,6 +18,11 @@
     }
   },
   "custom": {
+    "proxy": "PROXY_ADDRESS",
+    "download": {
+      "host": "DOWNLOAD_HOST",
+      "port": "DOWNLOAD_PORT"
+    },
     "rocket": {
       "url": "ROCKET_CHAT_URL",
       "api": "ROCKET_CHAT_API_VERSION",
