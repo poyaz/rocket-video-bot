@@ -60,6 +60,22 @@ app.post('/hook/rocket', async (req, res) => {
     download: null,
   };
 
+  const supportMatch = /^!support/.exec(message);
+  if (supportMatch) {
+    await helper.sendRocketSuccess(sendTo._id, {
+      text:
+        `لیست سایت‌ها:` +
+        `\n\n` +
+        `> youtube.com\n` +
+        `> cnn.com\n` +
+        `> wsj.com\n` +
+        `> barrons.com`,
+      emoji: {
+        enable: false,
+      },
+    });
+  }
+
   const youtubeMatch = /youtube\.com\/watch\?v=(.+)/.exec(message);
   if (youtubeMatch) {
     videoObj.id = youtubeMatch[1];
@@ -81,6 +97,7 @@ app.post('/hook/rocket', async (req, res) => {
       },
       part: {
         'downloading-video': null,
+        save: null,
       },
     };
 
@@ -109,6 +126,7 @@ app.post('/hook/rocket', async (req, res) => {
       },
       part: {
         'downloading-video': null,
+        save: null,
       },
     };
 
@@ -142,11 +160,42 @@ app.post('/hook/rocket', async (req, res) => {
       },
       part: {
         'downloading-video': null,
+        save: null,
       },
     };
 
     await helper.createFolder(md5sum);
     videoObj.download = helper.startDownloadSubtitleFromCnn(videoObj.id, message);
+  }
+
+  const barronMatch = /barrons\.com\/video.+\/(.+).html$/.exec(message);
+  if (barronMatch) {
+    videoObj.id = barronMatch[1];
+
+    db[videoObj.id] = {
+      type: 'barron',
+      hash: videoObj.id,
+      subtitle: {
+        exist: false,
+      },
+      message: {
+        rid: null,
+        'fetch-subtitle-info': null,
+        'downloading-subtitle': null,
+        'fetch-video-info': null,
+        'downloading-video': null,
+      },
+      last: {
+        'downloading-video': null,
+      },
+      part: {
+        'downloading-video': null,
+        save: null,
+      },
+    };
+
+    await helper.createFolder(videoObj.id);
+    videoObj.download = helper.startDownloadSubtitleFromBarron(videoObj.id, message);
   }
 
   if (videoObj.id && videoObj.download) {
