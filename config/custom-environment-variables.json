@@ -20,8 +20,13 @@
   "custom": {
     "proxy": "PROXY_ADDRESS",
     "download": {
+      "protocol": "DOWNLOAD_PROTOCOL",
       "host": "DOWNLOAD_HOST",
-      "port": "DOWNLOAD_PORT"
+      "port": "DOWNLOAD_PORT",
+      "replace": {
+        "from": "DOWNLOAD_REPLACE_FROM",
+        "to": "DOWNLOAD_REPLACE_TO"
+      }
     },
     "rocket": {
       "url": "ROCKET_CHAT_URL",
