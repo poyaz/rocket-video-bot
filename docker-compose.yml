@@ -33,12 +33,16 @@ services:
 #      - "USER_SSH_PRIVATE_KEY=$USER_SSH_PRIVATE_KEY"
     networks:
       - main
+    healthcheck:
+      test: sh -c "curl --proxy socks5://127.0.0.1:$$SSH_TUNNEL_PORT google.com || exit 1"
+      interval: 1m
     restart: "always"
 
   download:
     image: docker.loc:5000/httpd:2.4-alpine
     volumes:
       - $PWD/storage/download:/usr/local/apache2/htdocs/download
+      - $PWD/storage/private/httpd.conf:/usr/local/apache2/conf/httpd.conf
     networks:
       - main
     restart: "always"
