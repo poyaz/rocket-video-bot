@@ -1,6 +1,8 @@
 version: '2.2'
 services:
   api:
+    build:
+      context: docker/dockerfile/part/api
     environment:
       - "NPM_REGISTRY=https://npm.partdp.ir"
       - "NODE_ENV=partdp"
