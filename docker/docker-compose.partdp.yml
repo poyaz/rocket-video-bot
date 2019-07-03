@@ -4,8 +4,7 @@ services:
     build:
       context: docker/dockerfile/part/api
     environment:
-      - "NPM_REGISTRY=https://npm.partdp.ir"
-      - "NODE_ENV=partdp"
+      - "NODE_ENV=part"
     expose:
       - 80
     volumes:
