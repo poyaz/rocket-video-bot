@@ -7,6 +7,7 @@ const express = require('express');
 const Promise = require('bluebird');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const url = require('url');
 
 const PORT = config.get('server.http.port');
 
@@ -137,6 +138,15 @@ app.post('/hook/rocket', async (req, res) => {
   const cnnMatch = /cnn\.com\/videos\/(.+)/.exec(message);
   if (cnnMatch) {
     videoObj.id = cnnMatch[1];
+    videoObj.link = message;
+
+    if (!cnnMatch[1].match(/\.cnn$/)) {
+      const { protocol, host, path } = url.parse(message);
+      const [, newId] = /\/videos\/(.+\.cnn)/.exec(path);
+      videoObj.id = newId;
+      videoObj.link = `${protocol}//${host}/${newId}`;
+    }
+
     const md5sum = crypto
       .createHash('md5')
       .update(videoObj.id)
@@ -165,7 +175,7 @@ app.post('/hook/rocket', async (req, res) => {
     };
 
     await helper.createFolder(md5sum);
-    videoObj.download = helper.startDownloadSubtitleFromCnn(videoObj.id, message);
+    videoObj.download = helper.startDownloadSubtitleFromCnn(videoObj.id, videoObj.link);
   }
 
   const barronMatch = /barrons\.com\/video.+\/(.+).html$/.exec(message);
